@@ -21,11 +21,14 @@
     "expo-splash-screen": "~0.29.22",
     "expo-status-bar": "~2.0.1",
     "lottie-react-native": "7.1.0",
+    "nativewind": "^4.1.23",
     "react": "18.3.1",
     "react-native": "0.76.7",
     "react-native-gesture-handler": "~2.20.2",
+    "react-native-paper": "^5.13.1",
     "react-native-picker": "^4.3.7",
-    "react-native-reanimated": "2.x.x"
+    "react-native-reanimated": "~3.16.1",
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

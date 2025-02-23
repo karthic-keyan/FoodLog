@@ -7,11 +7,14 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  FlatList,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../theme/ThemeContext';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Card } from 'react-native-paper';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const DashboardScreen = ({ navigation }) => {
   const { colors } = useTheme();
@@ -42,10 +45,16 @@ const DashboardScreen = ({ navigation }) => {
       setLogs(updatedLogs);
       await AsyncStorage.setItem('foodLogs', JSON.stringify(updatedLogs));
       setNewMeal({ mealType: 'Breakfast', mealName: '', calories: '' });
-      setModalVisible(false); // Close modal after submission
+      setModalVisible(false);
     } else {
       alert('Please fill in all fields');
     }
+  };
+
+  const deleteLog = async (index) => {
+    const updatedLogs = logs.filter((_, i) => i !== index);
+    setLogs(updatedLogs);
+    await AsyncStorage.setItem('foodLogs', JSON.stringify(updatedLogs));
   };
 
   const totalCalories = logs.reduce((sum, log) => sum + (parseInt(log.calories) || 0), 0);
@@ -53,36 +62,40 @@ const DashboardScreen = ({ navigation }) => {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.date, { color: colors.text }]}>{currentDate}</Text>
-      <ScrollView>
-        {['Breakfast', 'Lunch', 'Dinner', 'Snacks'].map((meal, index) => (
+      
+      <FlatList
+        data={['Breakfast', 'Lunch', 'Dinner', 'Snacks']}
+        keyExtractor={(meal) => meal}
+        renderItem={({ item: meal, index }) => (
           <Animated.View entering={FadeInDown.delay(index * 100)} key={meal}>
             <Text style={[styles.mealTitle, { color: colors.text }]}>{meal}</Text>
             {logs
-              .filter(log => log.mealType?.toLowerCase() === meal?.toLowerCase())
+              .filter((log) => log.mealType?.toLowerCase() === meal?.toLowerCase())
               .map((log, i) => (
-                <Text key={i} style={{ color: colors.text }}>
-                  {log.mealName}: {log.calories} cal
-                </Text>
+                <Card key={i} style={[styles.card, { backgroundColor: colors.card }]}>
+                  <View style={styles.cardContent}>
+                    <Text style={[styles.mealText, { color: colors.text }]}>
+                      {log.mealName} - {log.calories} cal
+                    </Text>
+                    <TouchableOpacity onPress={() => deleteLog(i)}>
+                      <MaterialIcons name="delete" size={22} color="red" />
+                    </TouchableOpacity>
+                  </View>
+                </Card>
               ))}
           </Animated.View>
-        ))}
-      </ScrollView>
+        )}
+      />
+
       <Text style={[styles.total, { color: colors.text }]}>
         Total Calories: {totalCalories}
       </Text>
-      <TouchableOpacity
-        style={[styles.settingsButton, { backgroundColor: colors.card }]}
-        onPress={() => navigation.navigate('Settings')}
-      >
-        <Text style={{ color: colors.text }}>Settings</Text>
-      </TouchableOpacity>
 
-      {/* Floating Action Button */}
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: colors.card }]}
+        style={[styles.fab, { backgroundColor: "green" }]}
         onPress={() => setModalVisible(true)}
       >
-        <Text style={[styles.fabText, { color: colors.text }]}>+</Text>
+        <Text style={[styles.fabText, { color: 'white' }]}>+</Text>
       </TouchableOpacity>
 
       {/* Modal for Adding Food Log */}
@@ -93,12 +106,11 @@ const DashboardScreen = ({ navigation }) => {
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>
               Add Food Log
             </Text>
 
-            {/* Meal Type Dropdown */}
             <Picker
               selectedValue={newMeal.mealType}
               style={[styles.picker, { color: colors.text }]}
@@ -112,7 +124,6 @@ const DashboardScreen = ({ navigation }) => {
               <Picker.Item label="Snacks" value="Snacks" />
             </Picker>
 
-            {/* Meal Name Input */}
             <TextInput
               style={[styles.input, { color: colors.text, borderColor: colors.text }]}
               placeholder="Meal Name"
@@ -121,7 +132,6 @@ const DashboardScreen = ({ navigation }) => {
               onChangeText={(text) => setNewMeal({ ...newMeal, mealName: text })}
             />
 
-            {/* Calories Input */}
             <TextInput
               style={[styles.input, { color: colors.text, borderColor: colors.text }]}
               placeholder="Calories"
@@ -131,13 +141,12 @@ const DashboardScreen = ({ navigation }) => {
               onChangeText={(text) => setNewMeal({ ...newMeal, calories: text })}
             />
 
-            {/* Submit and Cancel Buttons */}
             <View style={styles.buttonContainer}>
               <TouchableOpacity
-                style={[styles.submitButton, { backgroundColor: colors.card }]}
+                style={[styles.submitButton, { backgroundColor: colors.primary }]}
                 onPress={saveLog}
               >
-                <Text style={{ color: colors.text }}>Submit</Text>
+                <Text style={{ color: 'white' }}>Submit</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.cancelButton, { backgroundColor: colors.card }]}
@@ -155,40 +164,32 @@ const DashboardScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
-  date: { fontSize: 18, marginBottom: 20 },
-  mealTitle: { fontSize: 16, marginVertical: 10 },
-  total: { fontSize: 18, marginTop: 20 },
-  settingsButton: { padding: 10, borderRadius: 5, alignSelf: 'flex-start' },
+  date: { fontSize: 20, marginBottom: 15, fontWeight: '600' },
+  mealTitle: { fontSize: 18, marginVertical: 10, fontWeight: 'bold' },
+  total: { fontSize: 20, marginTop: 20, fontWeight: 'bold' },
   fab: {
     position: 'absolute',
     bottom: 30,
     right: 20,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 65,
+    height: 65,
+    borderRadius: 32.5,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
   },
-  fabText: { fontSize: 30 },
+  fabText: { fontSize: 30, fontWeight: 'bold' },
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  modalContent: {
-    width: '80%',
-    padding: 20,
-    borderRadius: 10,
-    elevation: 5,
-  },
-  modalTitle: { fontSize: 20, marginBottom: 20, textAlign: 'center' },
+  modalContent: { width: '85%', padding: 20, borderRadius: 15, elevation: 5 },
   picker: { height: 50, width: '100%', marginBottom: 20 },
-  input: { borderWidth: 1, padding: 10, marginVertical: 10, borderRadius: 5 },
-  buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
-  submitButton: { padding: 10, borderRadius: 5, flex: 1, marginRight: 10, alignItems: 'center' },
-  cancelButton: { padding: 10, borderRadius: 5, flex: 1, alignItems: 'center' },
+  input: { borderWidth: 1, padding: 12, marginVertical: 10, borderRadius: 8 },
+  card: { marginVertical: 5, padding: 10, borderRadius: 10 },
+  cardContent: { flexDirection: 'row', justifyContent: 'space-between' },
 });
 
 export default DashboardScreen;
