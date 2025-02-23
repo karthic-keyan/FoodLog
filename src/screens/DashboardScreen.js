@@ -61,8 +61,12 @@ const DashboardScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header]}>
       <Text style={[styles.date, { color: colors.text }]}>{currentDate}</Text>
-      
+      <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+          <MaterialIcons name="settings" size={28} color={colors.text} />
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={['Breakfast', 'Lunch', 'Dinner', 'Snacks']}
         keyExtractor={(meal) => meal}
@@ -190,6 +194,7 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1, padding: 12, marginVertical: 10, borderRadius: 8 },
   card: { marginVertical: 5, padding: 10, borderRadius: 10 },
   cardContent: { flexDirection: 'row', justifyContent: 'space-between' },
+  header: {display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'},
 });
 
 export default DashboardScreen;
