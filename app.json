@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "YourAppName",
+    "name": "foodLog",
     "slug": "YourAppName",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -19,10 +19,17 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.karthikeyanr.YourAppName"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f0be5218-4428-43e0-a426-ec464240e5c7"
+      }
+    },
+    "owner": "karthikeyanr"
   }
 }
